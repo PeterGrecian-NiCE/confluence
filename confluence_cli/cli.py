@@ -1,5 +1,6 @@
 import json
 import os
+import base64
 from pathlib import Path
 
 import httpx
@@ -18,13 +19,39 @@ def _required_env(name: str) -> str:
     return value
 
 
-def _confluence_client() -> tuple[str, httpx.Client]:
-    base_url = _required_env("CONFLUENCE_BASE_URL").rstrip("/")
-    token = _required_env("CONFLUENCE_API_TOKEN")
-    headers = {
+def _first_set(*names: str) -> str:
+    for name in names:
+        value = os.getenv(name, "").strip()
+        if value:
+            return value
+    return ""
+
+
+def _auth_headers() -> dict[str, str]:
+    token = _first_set("CONFLUENCE_API_TOKEN", "ATLASSIAN_API_TOKEN", "CONFLUENCE_TOKEN")
+    if not token:
+        raise typer.BadParameter(
+            "Missing API token. Set one of: CONFLUENCE_API_TOKEN, ATLASSIAN_API_TOKEN, CONFLUENCE_TOKEN"
+        )
+
+    email = _first_set("CONFLUENCE_EMAIL", "ATLASSIAN_EMAIL", "ATLASSIAN_USER_EMAIL")
+
+    if email:
+        basic = base64.b64encode(f"{email}:{token}".encode("utf-8")).decode("ascii")
+        return {
+            "Authorization": f"Basic {basic}",
+            "Accept": "application/json",
+        }
+
+    return {
         "Authorization": f"Bearer {token}",
         "Accept": "application/json",
     }
+
+
+def _confluence_client() -> tuple[str, httpx.Client]:
+    base_url = _required_env("CONFLUENCE_BASE_URL").rstrip("/")
+    headers = _auth_headers()
     client = httpx.Client(headers=headers, timeout=30)
     return base_url, client
 

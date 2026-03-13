@@ -21,7 +21,12 @@ pip install -e .
 ```bash
 export CONFLUENCE_BASE_URL="https://<your-domain>.atlassian.net/wiki"
 export CONFLUENCE_API_TOKEN="<api-token>"
+export CONFLUENCE_EMAIL="<your-email>"   # recommended for Atlassian Cloud
 ```
+
+Auth behavior:
+- If `CONFLUENCE_EMAIL` is set, CLI uses Basic auth (`email:token`) for Atlassian Cloud.
+- If email is not set, CLI falls back to Bearer token auth.
 
 4. Run:
 
