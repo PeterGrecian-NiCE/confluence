@@ -34,3 +34,17 @@ confluence-export health
 ```bash
 confluence-export export-page --page-id 123456 --output exports/
 ```
+
+## Trackpad-Saver Shortcuts
+
+Use the helper script for repetitive tasks:
+
+```bash
+bin/confluence-workflow.sh doctor
+bin/confluence-workflow.sh health
+bin/confluence-workflow.sh export-page 123456
+```
+
+- `doctor` writes a timestamped diagnostics log in `tmp/`
+- `health` checks API access with current env vars
+- `export-page` exports JSON to `exports/` (or custom output path)
